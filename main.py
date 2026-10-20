@@ -18,14 +18,44 @@ PUBLISH_HOUR_IST = int(os.getenv("PUBLISH_HOUR_IST", "19"))
 PUBLISH_MINUTE_IST = int(os.getenv("PUBLISH_MINUTE_IST", "0"))
 
 IDEAS = [
-    {"topic":"The Quiet Power of Discipline","hook":"YOUR AURA GROWS IN SILENCE","body":"Stop announcing every move. Build in silence. Let your discipline speak when the results arrive.","cta":"FOLLOW ASHISAURA FOR DAILY AURA"},
-    {"topic":"Main Character Energy","hook":"MOVE LIKE YOU BELIEVE IN YOURSELF","body":"You do not need everyone's approval. Know your values, protect your focus, and take the next step.","cta":"SAVE THIS FOR YOUR NEXT RESET"},
-    {"topic":"Control Your Emotions","hook":"CALM IS A DIFFERENT KIND OF POWER","body":"Pause before you react. Not every challenge deserves your energy. Choose your response, then move forward.","cta":"FOLLOW FOR MORE MINDSET SHORTS"},
-    {"topic":"Consistency Beats Motivation","hook":"MOTIVATION FADES. HABITS STAY.","body":"Make the promise small enough to keep today. Repeat it tomorrow. Consistency turns ordinary effort into progress.","cta":"SEND THIS TO YOUR FUTURE SELF"},
-    {"topic":"Protect Your Focus","hook":"NOT EVERYONE NEEDS ACCESS TO YOU","body":"Protect your time, choose your circle carefully, and give your goals more attention than distractions.","cta":"FOLLOW ASHISAURA"},
-    {"topic":"Quiet Confidence","hook":"YOU DON'T HAVE TO PROVE EVERYTHING","body":"Confidence is doing the work without needing applause. Stay humble, stay prepared, and let your actions answer.","cta":"SAVE THIS REMINDER"},
-    {"topic":"Reset After Failure","hook":"A BAD DAY IS NOT YOUR WHOLE STORY","body":"Learn what you can, release what you cannot change, and begin again with one useful action.","cta":"FOLLOW FOR DAILY MINDSET"},
+    {
+        "topic": "Awaken Your Hidden Power",
+        "hook": "YOUR TRUE POWER IS STILL SLEEPING",
+        "body": "The strongest warriors are not born awakened. They train in silence, face their shadows, and rise after every defeat. Your next transformation begins when you refuse to give up.",
+        "cta": "FOLLOW ASHISAURA FOR MORE AURA"
+    },
+    {
+        "topic": "The Coldest Anime Aura",
+        "hook": "ONE LOOK. UNLIMITED POWER.",
+        "body": "The battlefield goes silent. His eyes begin to glow as violet energy tears through the darkness. He takes one step forward, and everyone realizes the real battle has just begun.",
+        "cta": "COMMENT YOUR AURA COLOR"
+    },
+    {
+        "topic": "Limit Break Transformation",
+        "hook": "THIS IS HIS FINAL FORM",
+        "body": "Blue flames rise around the warrior. Lightning cracks across his awakened eyes. Every limit he once believed in disappears as a new force erupts from within.",
+        "cta": "FOLLOW FOR THE NEXT AWAKENING"
+    },
+    {
+        "topic": "Shadow Warrior Awakening",
+        "hook": "NEVER UNDERESTIMATE THE QUIET ONE",
+        "body": "He stands alone beneath a crimson sky. Dark energy coils around his body, his eyes flash red, and the ground trembles. The shadow warrior has finally awakened.",
+        "cta": "WHICH AURA WOULD YOU CHOOSE"
+    },
+    {
+        "topic": "The Power Behind Glowing Eyes",
+        "hook": "WHEN HIS EYES CHANGE, RUN",
+        "body": "A golden light ignites inside his eyes. Energy spirals into the sky as his hair lifts in the storm. This is not anger. This is power finally unleashed.",
+        "cta": "FOLLOW ASHISAURA FOR MORE"
+    },
+    {
+        "topic": "The Last Warrior Standing",
+        "hook": "HE REFUSED TO FALL",
+        "body": "Broken armor. Burning skies. One warrior still stands. His electric blue aura returns brighter than before, proving that the final strike belongs to the one who keeps fighting.",
+        "cta": "SAVE THIS AURA MOMENT"
+    }
 ]
+
 
 def gemini_idea():
     key = os.getenv("GEMINI_API_KEY", "").strip()
