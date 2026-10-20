@@ -62,7 +62,16 @@ def gemini_idea():
     if not key:
         return None
     # Optional: Gemini API key from Google AI Studio. If unavailable/quota-limited, use built-in ideas.
-    prompt = """Create one original, safe-for-work 25-35 second YouTube Short for AshisAura, a motivational anime-aura mindset channel. Do not use copyrighted characters, quotes, lyrics, or claim a quote is from a real person. Return ONLY valid JSON with keys topic, hook (max 7 words, uppercase), body (35-55 words), cta (max 8 words), title (max 65 chars), description (2 short sentences plus 3-5 hashtags), tags (array of 5-10 relevant keyword strings). Avoid repetitive clickbait."""
+    prompt = """Create one original anime-aura YouTube Short for AshisAura.
+Theme: original anime warriors, glowing eyes, power awakenings,
+spiky hair, supernatural aura, lightning, dramatic battles and
+cinematic transformations. Do not use copyrighted characters.
+Return ONLY valid JSON with keys topic, hook, body, cta, title,
+description, tags. The hook must be uppercase and max 7 words.
+The body must be 35-55 words and describe a cinematic anime scene.
+The title must be max 65 characters. Description: 2 short sentences
+plus 3-5 hashtags. Tags: array of 5-10 relevant keywords.
+Keep content original and suitable for a general audience."""
     try:
         r = requests.post(
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
@@ -114,40 +123,240 @@ def wrap(draw, text, fnt, max_width):
     if cur: lines.append(cur)
     return lines
 
+
 def make_scene(path, title, line, index, total):
-    im = Image.new("RGB", (W,H), (5, 7, 22))
+    import math
+
+    # Each scene gets its own original aura color.
+    palettes = [
+        ((125, 70, 255), (65, 210, 255)),   # Violet + cyan
+        ((255, 45, 105), (255, 145, 50)),   # Crimson + orange
+        ((40, 140, 255), (100, 245, 255)),  # Electric blue
+        ((180, 55, 255), (255, 60, 170)),   # Purple + pink
+        ((255, 190, 35), (255, 90, 30)),    # Golden fire
+    ]
+    aura, accent = palettes[index % len(palettes)]
+
+    im = Image.new("RGB", (W, H), (4, 5, 18))
     px = im.load()
-    # Deep navy/purple gradient with a central aura glow.
+
+    # Atmospheric navy background with a colored central glow.
     for y in range(H):
         for x in range(W):
-            dx, dy = (x-W*0.5)/(W*0.75), (y-H*0.45)/(H*0.75)
-            glow = max(0, 1-(dx*dx+dy*dy)**0.5)
-            px[x,y] = (int(5+18*glow), int(7+8*glow), int(22+65*glow))
+            dx = (x - W * 0.5) / (W * 0.8)
+            dy = (y - H * 0.43) / (H * 0.8)
+            glow = max(0.0, 1.0 - math.sqrt(dx * dx + dy * dy))
+            px[x, y] = (
+                min(255, int(4 + aura[0] * glow * 0.20)),
+                min(255, int(5 + aura[1] * glow * 0.18)),
+                min(255, int(18 + aura[2] * glow * 0.30)),
+            )
+
     d = ImageDraw.Draw(im, "RGBA")
-    cx, cy = W//2, H//2-70
-    for rad in range(500, 70, -24):
-        alpha = max(3, 22-int(rad/30))
-        d.ellipse((cx-rad,cy-rad,cx+rad,cy+rad), outline=(105,95,255,alpha), width=5)
-    # Original abstract silhouette, not a known character.
-    d.ellipse((cx-95, cy-290, cx+95, cy-100), fill=(10,12,30,255), outline=(170,150,255,220), width=7)
-    d.polygon([(cx-220,cy+250),(cx-130,cy-110),(cx+130,cy-110),(cx+220,cy+250)], fill=(10,12,30,255), outline=(135,125,255,230))
-    d.line((cx-150,cy+10,cx,cy+120,cx+150,cy+10), fill=(140,225,255,200), width=8)
-    # Top label and scene text.
-    d.rounded_rectangle((72,115,1008,205), radius=35, fill=(22,20,55,220), outline=(140,130,255,180), width=3)
-    d.text((W//2,160), "ASHISAURA  •  MINDSET", font=font(34,True), fill=(225,225,255), anchor="mm")
-    headline = title if index == 0 else ["REMEMBER THIS","STAY FOCUSED","KEEP BUILDING","YOUR NEXT MOVE"][min(index-1,3)]
-    f = font(66, True)
-    lines = wrap(d, headline.upper(), f, 900)
+    cx, cy = W // 2, 730
+
+    # Glowing aura rings behind the character.
+    for rad in range(410, 100, -22):
+        alpha = max(8, 75 - rad // 8)
+        d.ellipse(
+            (cx-rad, cy-rad, cx+rad, cy+rad),
+            outline=(*aura, alpha),
+            width=4 if rad < 250 else 2,
+        )
+
+    # Small energy particles.
+    rng = random.Random(900 + index)
+    for _ in range(95):
+        x = rng.randint(70, W - 70)
+        y = rng.randint(280, 1110)
+        r = rng.choice([2, 3, 4, 6])
+        col = aura if rng.random() < 0.65 else accent
+        d.ellipse((x-r, y-r, x+r, y+r), fill=(*col, rng.randint(90, 230)))
+
+    # Jagged lightning bolts behind the warrior.
+    for side in (-1, 1):
+        for bolt in range(3):
+            x = cx + side * (250 + bolt * 42)
+            y = 340 + bolt * 80
+            points = [(x, y)]
+            for _ in range(6):
+                x += side * rng.randint(-35, 35)
+                y += rng.randint(45, 90)
+                points.append((x, y))
+            d.line(points, fill=(*aura, 95), width=13, joint="curve")
+            d.line(points, fill=(*accent, 220), width=4, joint="curve")
+
+    # Torso, high collar and shoulders.
+    d.polygon(
+        [
+            (cx-95, 770), (cx+95, 770),
+            (cx+155, 875), (cx+245, 1115),
+            (cx-245, 1115), (cx-155, 875),
+        ],
+        fill=(10, 13, 32, 255),
+        outline=(*aura, 255),
+    )
+    d.polygon(
+        [(cx-105, 825), (cx, 920), (cx+105, 825),
+         (cx+65, 1010), (cx, 1055), (cx-65, 1010)],
+        fill=(20, 24, 55, 255),
+        outline=(*accent, 220),
+    )
+
+    # Neck.
+    d.rounded_rectangle(
+        (cx-52, 735, cx+52, 850),
+        radius=24,
+        fill=(112, 73, 79, 255),
+        outline=(*aura, 230),
+        width=3,
+    )
+
+    # Original anime-style face.
+    d.ellipse(
+        (cx-122, 450, cx+122, 775),
+        fill=(224, 174, 151, 255),
+        outline=(255, 218, 205, 255),
+        width=4,
+    )
+
+    # Face shadows and jaw accents.
+    d.polygon(
+        [(cx, 505), (cx+115, 535), (cx+93, 710),
+         (cx+28, 770), (cx, 745)],
+        fill=(118, 76, 96, 100),
+    )
+
+    # Ears.
+    d.ellipse((cx-145, 575, cx-103, 650), fill=(190, 126, 126, 255))
+    d.ellipse((cx+103, 575, cx+145, 650), fill=(190, 126, 126, 255))
+
+    # Dramatic spiky hair silhouette.
+    hair = (12, 14, 35, 255)
+    d.polygon(
+        [
+            (cx-132, 585), (cx-176, 470), (cx-133, 480),
+            (cx-157, 380), (cx-85, 430), (cx-94, 315),
+            (cx-28, 405), (cx+8, 285), (cx+42, 405),
+            (cx+112, 330), (cx+98, 440), (cx+165, 400),
+            (cx+142, 510), (cx+125, 600),
+            (cx+88, 510), (cx+35, 485),
+            (cx-20, 510), (cx-80, 490),
+        ],
+        fill=hair,
+        outline=(*aura, 255),
+    )
+
+    # Hair highlights.
+    d.line(
+        [(cx-118, 475), (cx-83, 440), (cx-87, 365)],
+        fill=(*accent, 230), width=7,
+    )
+    d.line(
+        [(cx+17, 395), (cx+10, 325)],
+        fill=(*aura, 245), width=7,
+    )
+    d.line(
+        [(cx+104, 440), (cx+140, 418)],
+        fill=(*accent, 220), width=6,
+    )
+
+    # Sharp eyebrows.
+    d.line(
+        [(cx-91, 585), (cx-28, 601)],
+        fill=(22, 13, 31, 255), width=13,
+    )
+    d.line(
+        [(cx+28, 601), (cx+91, 585)],
+        fill=(22, 13, 31, 255), width=13,
+    )
+
+    # Glowing anime eyes with bright pupils and highlights.
+    for ex in (cx-60, cx+60):
+        d.polygon(
+            [(ex-39, 615), (ex, 600), (ex+39, 615),
+             (ex+15, 647), (ex-17, 647)],
+            fill=(245, 245, 255, 255),
+            outline=(*accent, 255),
+        )
+        d.ellipse(
+            (ex-13, 605, ex+13, 642),
+            fill=(*aura, 255),
+        )
+        d.ellipse(
+            (ex-5, 610, ex+5, 635),
+            fill=(255, 255, 255, 255),
+        )
+        d.line(
+            [(ex-37, 614), (ex, 600), (ex+37, 614)],
+            fill=(15, 10, 28, 255), width=5,
+        )
+
+    # Nose and determined expression.
+    d.line(
+        [(cx+4, 630), (cx-4, 672), (cx+12, 676)],
+        fill=(105, 63, 78, 210), width=4,
+    )
+    d.line(
+        [(cx-32, 714), (cx, 722), (cx+32, 714)],
+        fill=(74, 29, 49, 255), width=5,
+    )
+
+    # Aura sparks around the face.
+    for side in (-1, 1):
+        for j in range(4):
+            x = cx + side * (155 + j * 16)
+            y = 530 + j * 72
+            d.line(
+                [(x, y), (x + side * 18, y - 22),
+                 (x + side * 8, y + 14)],
+                fill=(*accent, 220), width=4,
+            )
+
+    # Brand label.
+    d.rounded_rectangle(
+        (72, 115, 1008, 205),
+        radius=35,
+        fill=(12, 12, 35, 235),
+        outline=(*aura, 230),
+        width=3,
+    )
+    d.text(
+        (W//2, 160), "ASHISAURA  •  ANIME AURA",
+        font=font(34, True), fill=(240, 238, 255, 255), anchor="mm",
+    )
+
+    # Main headline.
+    headline = title if index == 0 else [
+        "POWER AWAKENING", "UNLEASH YOUR AURA",
+        "LIMIT BREAK", "THE FINAL FORM",
+    ][min(index - 1, 3)]
+
+    f = font(64, True)
     yy = 1190
-    for ln in lines[:3]:
-        d.text((W//2,yy), ln, font=f, fill=(255,255,255), stroke_width=2, stroke_fill=(18,12,60), anchor="mm")
+    for ln in wrap(d, headline.upper(), f, 900)[:3]:
+        d.text(
+            (W//2, yy), ln, font=f,
+            fill=(255, 255, 255, 255),
+            stroke_width=3, stroke_fill=(*aura, 255), anchor="mm",
+        )
         yy += 88
-    lf = font(38)
+
+    lf = font(36)
     for ln in wrap(d, line, lf, 860)[:3]:
-        d.text((W//2,yy+35), ln, font=lf, fill=(205,218,255), anchor="mm")
+        d.text(
+            (W//2, yy+35), ln, font=lf,
+            fill=(218, 224, 255, 255), anchor="mm",
+        )
         yy += 55
-    d.text((W//2,1770), f"{index+1:02d} / {total:02d}", font=font(28,True), fill=(160,160,220), anchor="mm")
-    im.save(path, quality=92)
+
+    d.text(
+        (W//2, 1770), f"{index+1:02d} / {total:02d}",
+        font=font(28, True), fill=(190, 185, 240, 255), anchor="mm",
+    )
+
+    im.save(path)
+
 
 async def make_voice(text, outpath):
     communicate = edge_tts.Communicate(text, VOICE, rate="+4%", volume="+0%")
