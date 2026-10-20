@@ -1,0 +1,62 @@
+name: Daily AshisAura Short
+
+on:
+  workflow_dispatch:
+  schedule:
+    # GitHub cron uses UTC: 06:30 UTC = 12:00 noon IST.
+    - cron: "30 6 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-ashisaura
+  cancel-in-progress: false
+
+jobs:
+  create-and-schedule:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install system tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+
+      - name: Restore YouTube OAuth files
+        env:
+          YOUTUBE_CLIENT_SECRET_B64: ${{ secrets.YOUTUBE_CLIENT_SECRET_B64 }}
+          YOUTUBE_TOKEN_B64: ${{ secrets.YOUTUBE_TOKEN_B64 }}
+        run: |
+          python - <<'PY'
+          import os, base64
+          for env_name, filename in [
+              ("YOUTUBE_CLIENT_SECRET_B64", "client_secret.json"),
+              ("YOUTUBE_TOKEN_B64", "token.json"),
+          ]:
+              value = os.environ.get(env_name, "")
+              if not value:
+                  raise SystemExit(f"Missing GitHub Actions secret: {env_name}")
+              with open(filename, "wb") as f:
+                  f.write(base64.b64decode(value))
+          PY
+
+      - name: Generate, SEO and schedule upload
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PUBLISH_HOUR_IST: "19"
+          PUBLISH_MINUTE_IST: "0"
+          TTS_VOICE: "en-US-GuyNeural"
+        run: python main.py
